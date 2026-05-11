@@ -1,0 +1,44 @@
+# Vercel环境变量配置
+# 复制以下内容，逐个添加到Vercel Dashboard
+
+# ==========================================
+# 必需变量 - AI功能需要
+# ==========================================
+
+名称: ANTHROPIC_API_KEY
+值: sk-ant-api03-xxxxxxxxxx-your-actual-key-here
+环境: Production, Preview, Development
+
+# ==========================================
+# 可选变量 - 暂时使用占位符
+# ==========================================
+
+名称: AIRTABLE_API_KEY
+值: patTEMPORARY_PLACEHOLDER_KEY
+环境: Production, Preview, Development
+
+名称: AIRTABLE_BASE_ID
+值: appTEMPORARY_BASE_ID
+环境: Production, Preview, Development
+
+名称: RESEND_API_KEY
+值: re_TEMPORARY_PLACEHOLDER
+环境: Production, Preview, Development
+
+名称: RESEND_FROM_EMAIL
+值: noreply@bizbroker.local
+环境: Production, Preview, Development
+
+名称: ADMIN_EMAIL
+值: admin@bizbroker.local
+环境: Production, Preview, Development
+
+# ==========================================
+# 注意：NEXT_PUBLIC_APP_URL 在首次部署后设置
+# 需要先获取Vercel分配的URL
+# ==========================================
+
+# 部署后再添加：
+# 名称: NEXT_PUBLIC_APP_URL
+# 值: https://你的vercel域名.vercel.app
+# 环境: Production, Preview, Development
