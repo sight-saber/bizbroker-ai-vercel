@@ -125,17 +125,3 @@ VERCEL_OIDC_TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Im1yay00MzAyZWMxY
 # Anthropic Claude API
 
 # 获取地址：<https://console.anthropic.com/settings/keys>
-
-ANTHROPIC_API_KEY=sk-ant-api03-your-actual-key-here
-
-# 可选配置（如需要数据保存和邮件通知功能）
-
-AIRTABLE_API_KEY=pat-your-airtable-token-here
-AIRTABLE_BASE_ID=app-your-base-id-here
-RESEND_API_KEY=re_your-resend-key-here
-RESEND_FROM_EMAIL=<onboarding@resend.dev>  
-ADMIN_EMAIL=<guoyongqing19880805@gmail.com>
-
-# 应用配置
-
-NEXT_PUBLIC_APP_URL=<https://bizbroker-ai-vercel.vercel.app>
