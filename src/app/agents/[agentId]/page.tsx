@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { getAgentById } from "@/lib/agents";
 import type { Message, AgentId } from "@/types";
 
@@ -90,13 +90,10 @@ function ChatBubble({
   );
 }
 
-export default function AgentChatPage({
-  params,
-}: {
-  params: Promise<{ agentId: string }>;
-}) {
-  const { agentId } = use(params);
+export default function AgentChatPage() {
+  const params = useParams();
   const router = useRouter();
+  const agentId = params.agentId as string;
   const agent = getAgentById(agentId as AgentId);
 
   const [messages, setMessages] = useState<Message[]>([]);
