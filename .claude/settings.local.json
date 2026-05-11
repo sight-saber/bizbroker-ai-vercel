@@ -10,7 +10,8 @@
       "Bash(npm run dev:*)",
       "Bash(npm run build:*)",
       "Bash(echo \"请运行以下命令：\n\nvercel env add ANTHROPIC_API_KEY production\n\n然后输入您的 API Key:\n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\")",
-      "Bash(vercel ls:*)"
+      "Bash(vercel ls:*)",
+      "Bash(echo:*)"
     ]
   }
 }
