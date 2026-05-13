@@ -1425,18 +1425,6 @@ export default function AgentChatPage() {
         growthTrend: formData.growthTrend,
       };
 
-      // Add a message to chat showing the form data
-      const summaryMessage = `📋 Form submitted with:\n\n` +
-        `**Business Name:** ${formData.businessName}\n` +
-        `**Industry:** ${formData.industry}\n` +
-        `**Annual Revenue:** SGD $${parseFloat(formData.annualRevenue).toLocaleString()}\n` +
-        `**Net Profit:** SGD $${parseFloat(formData.netProfit).toLocaleString()}\n` +
-        `**Years Operating:** ${formData.yearsInOperation} years\n` +
-        `**Asset Value:** SGD $${parseFloat(formData.assetValue).toLocaleString()}\n` +
-        `**Growth Trend:** ${formData.growthTrend}`;
-
-      setMessages([...messages, { role: "user", content: summaryMessage }]);
-
       // Calculate valuation
       const calcResponse = await fetch("/api/valuation/calculate", {
         method: "POST",
@@ -1479,7 +1467,7 @@ export default function AgentChatPage() {
     } finally {
       setProcessing(false);
     }
-  }, [messages, toast]);
+  }, [toast]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
