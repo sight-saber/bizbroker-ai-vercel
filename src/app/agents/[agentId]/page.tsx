@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getAgentById } from "@/lib/agents";
 import type { Message, AgentId, ValuationResult, ValuationRecord } from "@/types";
-import { useToast } from "@/hooks/useToast";
-import { ToastContainer } from "@/components/Toast";
+// import { useToast } from "@/hooks/useToast";
+// import { ToastContainer } from "@/components/Toast";
 import { ValuationSkeleton } from "@/components/LoadingSkeleton";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { InputGuide } from "@/components/InputGuide";
@@ -1169,7 +1169,7 @@ export default function AgentChatPage() {
   const router = useRouter();
   const agentId = params.agentId as string;
   const agent = getAgentById(agentId as AgentId);
-  const toast = useToast();
+  // const toast = useToast();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -1260,7 +1260,7 @@ export default function AgentChatPage() {
 
   const calculateValuation = useCallback(async () => {
     setProcessing(true);
-    toast.info("Analyzing conversation data...");
+    // // toast.info("Analyzing conversation data...");
 
     try {
       // Step 1: Extract data from conversation
@@ -1272,12 +1272,12 @@ export default function AgentChatPage() {
 
       const extractData = await extractResponse.json();
       if (!extractData.success) {
-        toast.error("Could not extract valuation data. Please provide all required information.");
+        // toast.error("Could not extract valuation data. Please provide all required information.");
         setProcessing(false);
         return;
       }
 
-      toast.info("Calculating valuation...");
+      // toast.info("Calculating valuation...");
 
       // Step 2: Calculate valuation
       const calcResponse = await fetch("/api/valuation/calculate", {
@@ -1289,11 +1289,11 @@ export default function AgentChatPage() {
       const calcData = await calcResponse.json();
       if (calcData.success) {
         setValuationResult(calcData.data);
-        toast.success("Valuation calculated successfully!");
+        // toast.success("Valuation calculated successfully!");
 
         // Auto-save to Airtable
         try {
-          toast.info("Saving to database...");
+          // toast.info("Saving to database...");
           const saveResponse = await fetch("/api/valuation/save", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1303,25 +1303,25 @@ export default function AgentChatPage() {
           const saveData = await saveResponse.json();
           if (saveData.success) {
             setAutoSaved(true);
-            toast.success("💾 Automatically saved to database!");
+            // toast.success("💾 Automatically saved to database!");
           } else {
             console.error("Auto-save failed:", saveData.error);
-            toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+            // toast.warning("Valuation calculated but auto-save failed. You can save manually.");
           }
         } catch (saveError) {
           console.error("Auto-save error:", saveError);
-          toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+          // toast.warning("Valuation calculated but auto-save failed. You can save manually.");
         }
       } else {
-        toast.error("Failed to calculate: " + calcData.error);
+        // toast.error("Failed to calculate: " + calcData.error);
       }
     } catch (error) {
       console.error("Valuation error:", error);
-      toast.error("An error occurred while calculating valuation");
+      // toast.error("An error occurred while calculating valuation");
     } finally {
       setProcessing(false);
     }
-  }, [messages, toast]);
+  }, [messages]);
 
   const saveValuation = useCallback(async () => {
     if (!valuationResult) return;
@@ -1336,22 +1336,22 @@ export default function AgentChatPage() {
 
       const data = await response.json();
       if (data.success) {
-        toast.success("Valuation saved successfully!");
+        // toast.success("Valuation saved successfully!");
       } else {
-        toast.error("Failed to save: " + data.error);
+        // toast.error("Failed to save: " + data.error);
       }
     } catch (error) {
       console.error("Save error:", error);
-      toast.error("An error occurred while saving");
+      // toast.error("An error occurred while saving");
     } finally {
       setSaving(false);
     }
-  }, [valuationResult, toast]);
+  }, [valuationResult]);
 
   const exportPDF = useCallback(async () => {
     if (!valuationResult) return;
 
-    toast.info("Generating PDF report...");
+    // // toast.info("Generating PDF report...");
 
     try {
       const response = await fetch("/api/valuation/export-pdf", {
@@ -1366,15 +1366,15 @@ export default function AgentChatPage() {
         printWindow.document.write(html);
         printWindow.document.close();
         setTimeout(() => printWindow.print(), 500);
-        toast.success("PDF report opened in new window");
+        // toast.success("PDF report opened in new window");
       } else {
-        toast.warning("Please allow popups to export PDF");
+        // toast.warning("Please allow popups to export PDF");
       }
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("Failed to export PDF");
+      // toast.error("Failed to export PDF");
     }
-  }, [valuationResult, toast]);
+  }, [valuationResult]);
 
   const loadHistory = useCallback(async () => {
     // Check cache first
@@ -1384,11 +1384,11 @@ export default function AgentChatPage() {
     if (cached) {
       setHistory(cached);
       setShowHistory(true);
-      toast.success(`Loaded ${cached.length} records from cache`);
+      // toast.success(`Loaded ${cached.length} records from cache`);
       return;
     }
 
-    toast.info("Loading history...");
+    // // toast.info("Loading history...");
     try {
       const response = await fetch("/api/valuation/history");
       const data = await response.json();
@@ -1397,20 +1397,20 @@ export default function AgentChatPage() {
         setShowHistory(true);
         // Cache for 5 minutes
         apiCache.set(cacheKey, data.data.valuations, 300000);
-        toast.success(`Loaded ${data.data.valuations.length} records`);
+        // toast.success(`Loaded ${data.data.valuations.length} records`);
       } else {
-        toast.error("Failed to load history");
+        // toast.error("Failed to load history");
       }
     } catch (error) {
       console.error("History error:", error);
-      toast.error("Failed to load history");
+      // toast.error("Failed to load history");
     }
-  }, [toast]);
+  }, []);
 
   const handleFormSubmit = useCallback(async (formData: any) => {
     setShowForm(false);
     setProcessing(true);
-    toast.info("Calculating valuation from form data...");
+    // // toast.info("Calculating valuation from form data...");
 
     try {
       // Prepare valuation input
@@ -1435,11 +1435,11 @@ export default function AgentChatPage() {
       const calcData = await calcResponse.json();
       if (calcData.success) {
         setValuationResult(calcData.data);
-        toast.success("Valuation calculated successfully!");
+        // toast.success("Valuation calculated successfully!");
 
         // Auto-save to Airtable
         try {
-          toast.info("Saving to database...");
+          // toast.info("Saving to database...");
           const saveResponse = await fetch("/api/valuation/save", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1449,25 +1449,25 @@ export default function AgentChatPage() {
           const saveData = await saveResponse.json();
           if (saveData.success) {
             setAutoSaved(true);
-            toast.success("💾 Automatically saved to database!");
+            // toast.success("💾 Automatically saved to database!");
           } else {
             console.error("Auto-save failed:", saveData.error);
-            toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+            // toast.warning("Valuation calculated but auto-save failed. You can save manually.");
           }
         } catch (saveError) {
           console.error("Auto-save error:", saveError);
-          toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+          // toast.warning("Valuation calculated but auto-save failed. You can save manually.");
         }
       } else {
-        toast.error("Failed to calculate: " + calcData.error);
+        // toast.error("Failed to calculate: " + calcData.error);
       }
     } catch (error) {
       console.error("Form submission error:", error);
-      toast.error("An error occurred while calculating valuation");
+      // toast.error("An error occurred while calculating valuation");
     } finally {
       setProcessing(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1494,7 +1494,7 @@ export default function AgentChatPage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Toast Container */}
-      <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
+      {/* <ToastContainer toasts={// toast.toasts} removeToast={// toast.removeToast} /> */}
 
       {/* Header */}
       <div
