@@ -1,0 +1,237 @@
+{
+  "examples": [
+    {
+      "name": "餐饮店 - 小型火锅店",
+      "description": "3年经营，稳定增长的小型火锅店",
+      "input": {
+        "businessName": "小龙坎火锅店",
+        "industry": "fnb_retail",
+        "annualRevenue": 1200000,
+        "netProfit": 180000,
+        "ebitda": 180000,
+        "yearsInOperation": 3,
+        "assetValue": 150000,
+        "growthTrend": "growing"
+      },
+      "expectedOutput": {
+        "conservative": "~396,000",
+        "fairMarket": "~466,000",
+        "optimistic": "~536,000"
+      }
+    },
+    {
+      "name": "科技公司 - SaaS平台",
+      "description": "2年初创，快速增长的SaaS公司",
+      "input": {
+        "businessName": "CloudSync SaaS",
+        "industry": "tech_saas",
+        "annualRevenue": 500000,
+        "netProfit": 100000,
+        "ebitda": 120000,
+        "yearsInOperation": 2,
+        "assetValue": 50000,
+        "growthTrend": "growing"
+      },
+      "expectedOutput": {
+        "conservative": "~1,165,000",
+        "fairMarket": "~1,370,000",
+        "optimistic": "~1,576,000"
+      }
+    },
+    {
+      "name": "教育机构 - 培训中心",
+      "description": "6年成熟，稳定运营的教育中心",
+      "input": {
+        "businessName": "优学教育中心",
+        "industry": "education",
+        "annualRevenue": 800000,
+        "netProfit": 200000,
+        "ebitda": 200000,
+        "yearsInOperation": 6,
+        "assetValue": 100000,
+        "growthTrend": "stable"
+      },
+      "expectedOutput": {
+        "conservative": "~530,000",
+        "fairMarket": "~624,000",
+        "optimistic": "~717,000"
+      }
+    },
+    {
+      "name": "服务公司 - 咨询公司",
+      "description": "8年资深，增长中的咨询公司",
+      "input": {
+        "businessName": "智慧咨询有限公司",
+        "industry": "services",
+        "annualRevenue": 500000,
+        "netProfit": 100000,
+        "ebitda": 100000,
+        "yearsInOperation": 8,
+        "assetValue": 20000,
+        "growthTrend": "growing"
+      },
+      "expectedOutput": {
+        "conservative": "~256,000",
+        "fairMarket": "~301,000",
+        "optimistic": "~346,000"
+      }
+    },
+    {
+      "name": "电商平台 - 在线商店",
+      "description": "4年电商，业务增长中",
+      "input": {
+        "businessName": "新加坡购物网",
+        "industry": "ecommerce",
+        "annualRevenue": 2000000,
+        "netProfit": 150000,
+        "ebitda": 180000,
+        "yearsInOperation": 4,
+        "assetValue": 200000,
+        "growthTrend": "growing"
+      },
+      "expectedOutput": {
+        "conservative": "~816,000",
+        "fairMarket": "~960,000",
+        "optimistic": "~1,104,000"
+      }
+    },
+    {
+      "name": "制造业 - 小型工厂",
+      "description": "10年制造业，稳定经营",
+      "input": {
+        "businessName": "精密制造厂",
+        "industry": "manufacturing",
+        "annualRevenue": 1500000,
+        "netProfit": 300000,
+        "ebitda": 350000,
+        "yearsInOperation": 10,
+        "assetValue": 500000,
+        "growthTrend": "stable"
+      },
+      "expectedOutput": {
+        "conservative": "~1,360,000",
+        "fairMarket": "~1,600,000",
+        "optimistic": "~1,840,000"
+      }
+    },
+    {
+      "name": "医疗诊所 - 专科诊所",
+      "description": "5年医疗诊所，业务稳定",
+      "input": {
+        "businessName": "健康专科诊所",
+        "industry": "healthcare",
+        "annualRevenue": 1000000,
+        "netProfit": 250000,
+        "ebitda": 280000,
+        "yearsInOperation": 5,
+        "assetValue": 300000,
+        "growthTrend": "stable"
+      },
+      "expectedOutput": {
+        "conservative": "~1,139,000",
+        "fairMarket": "~1,340,000",
+        "optimistic": "~1,541,000"
+      }
+    },
+    {
+      "name": "小型餐厅 - 快速测试用例",
+      "description": "5年小食堂，用于快速测试",
+      "input": {
+        "businessName": "小食堂",
+        "industry": "fnb_retail",
+        "annualRevenue": 500000,
+        "netProfit": 75000,
+        "ebitda": 75000,
+        "yearsInOperation": 5,
+        "assetValue": 50000,
+        "growthTrend": "stable"
+      },
+      "expectedOutput": {
+        "conservative": "~137,000",
+        "fairMarket": "~161,000",
+        "optimistic": "~186,000"
+      }
+    }
+  ],
+
+  "conversationExamples": [
+    {
+      "scenario": "餐饮店完整对话",
+      "messages": [
+        {"role": "assistant", "content": "你好！我是商业估值代理。你的企业叫什么名字？"},
+        {"role": "user", "content": "小龙坎火锅店"},
+        {"role": "assistant", "content": "好的。你的企业所属行业是什么？"},
+        {"role": "user", "content": "餐饮"},
+        {"role": "assistant", "content": "年度营业额是多少？（新币SGD）"},
+        {"role": "user", "content": "120万"},
+        {"role": "assistant", "content": "年度净利润是多少？"},
+        {"role": "user", "content": "18万"},
+        {"role": "assistant", "content": "经营了多少年？"},
+        {"role": "user", "content": "3年"},
+        {"role": "assistant", "content": "有形资产价值多少？"},
+        {"role": "user", "content": "15万"},
+        {"role": "assistant", "content": "业务增长趋势如何？"},
+        {"role": "user", "content": "稳定增长"}
+      ]
+    },
+    {
+      "scenario": "科技公司完整对话",
+      "messages": [
+        {"role": "assistant", "content": "你好！企业名称是什么？"},
+        {"role": "user", "content": "CloudSync"},
+        {"role": "assistant", "content": "所属行业？"},
+        {"role": "user", "content": "SaaS软件"},
+        {"role": "assistant", "content": "年营业额？"},
+        {"role": "user", "content": "50万新币"},
+        {"role": "assistant", "content": "净利润？"},
+        {"role": "user", "content": "10万"},
+        {"role": "assistant", "content": "经营年限？"},
+        {"role": "user", "content": "2年"},
+        {"role": "assistant", "content": "资产价值？"},
+        {"role": "user", "content": "5万"},
+        {"role": "assistant", "content": "增长趋势？"},
+        {"role": "user", "content": "快速增长"}
+      ]
+    }
+  ],
+
+  "industryMultipliers": {
+    "fnb_retail": {
+      "name": "餐饮/零售",
+      "revenueMultiplier": {"min": 0.3, "max": 0.6, "avg": 0.45},
+      "ebitdaMultiplier": {"min": 1.5, "max": 3.0, "avg": 2.25},
+      "includeAssets": false
+    },
+    "services": {
+      "name": "服务/咨询",
+      "ebitdaMultiplier": {"min": 2.0, "max": 4.0, "avg": 3.0},
+      "includeAssets": false
+    },
+    "tech_saas": {
+      "name": "科技/SaaS",
+      "revenueMultiplier": {"min": 3.0, "max": 6.0, "avg": 4.5},
+      "includeAssets": false
+    },
+    "education": {
+      "name": "教育/培训",
+      "ebitdaMultiplier": {"min": 2.0, "max": 4.0, "avg": 3.0},
+      "includeAssets": false
+    },
+    "manufacturing": {
+      "name": "制造业",
+      "ebitdaMultiplier": {"min": 3.0, "max": 5.0, "avg": 4.0},
+      "includeAssets": true
+    },
+    "ecommerce": {
+      "name": "电商",
+      "revenueMultiplier": {"min": 0.5, "max": 1.5, "avg": 1.0},
+      "ebitdaMultiplier": {"min": 2.0, "max": 4.0, "avg": 3.0},
+      "includeAssets": false
+    },
+    "healthcare": {
+      "name": "医疗/诊所",
+      "ebitdaMultiplier": {"min": 3.0, "max": 5.0, "avg": 4.0},
+      "includeAssets": false
+    }
+  }
+}
