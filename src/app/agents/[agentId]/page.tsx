@@ -39,20 +39,86 @@ const ChatBubble = memo(function ChatBubble({
 }) {
   const isUser = message.role === "user";
 
-  // Simple markdown rendering
+  // Enhanced markdown rendering
   const renderContent = (content: string) => {
-    let html = content
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-      .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-      .replace(/^---$/gim, "<hr />")
-      .replace(/^\- (.*$)/gim, "<li>$1</li>")
-      .replace(/\n/g, "<br />");
+    // Split content into lines for better processing
+    const lines = content.split('\n');
+    const processed: string[] = [];
+    let inList = false;
+    let inExampleBlock = false;
 
-    html = html.replace(/(<li>[\s\S]*?<\/li>)/gi, "<ul>$1</ul>");
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
 
-    return html;
+      // Handle example quotes (lines starting and ending with quotes)
+      if (line.trim().startsWith('"') && line.trim().endsWith('"')) {
+        if (!inExampleBlock) {
+          processed.push(`<div style="margin: 10px 0; padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border-left: 3px solid ${agentColor};">`);
+          inExampleBlock = true;
+        }
+        const example = line.trim().slice(1, -1);
+        processed.push(`<div style="padding: 8px 12px; margin: 5px 0; background: rgba(255, 255, 255, 0.08); border-radius: 6px; font-family: 'SF Mono', 'Monaco', 'Courier New', monospace; font-size: 13px; color: ${agentColor}; font-weight: 500;">${example}</div>`);
+
+        // Check if next line is also an example, if not close the block
+        if (i === lines.length - 1 || !lines[i + 1].trim().startsWith('"')) {
+          processed.push('</div>');
+          inExampleBlock = false;
+        }
+        continue;
+      }
+
+      // Handle list items
+      if (line.match(/^\s*[\-\*]\s+(.+)$/)) {
+        if (!inList) {
+          processed.push('<ul style="margin: 10px 0; padding-left: 24px; list-style-type: disc;">');
+          inList = true;
+        }
+        const itemContent = line.replace(/^\s*[\-\*]\s+/, '');
+        processed.push(`<li style="margin: 6px 0; line-height: 1.6;">${itemContent.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}</li>`);
+        continue;
+      } else if (inList) {
+        processed.push('</ul>');
+        inList = false;
+      }
+
+      // Handle headings
+      if (line.match(/^###\s+(.+)$/)) {
+        processed.push(`<h3 style="font-weight: bold; font-size: 14px; margin: 12px 0 6px 0;">${line.replace(/^###\s+/, '')}</h3>`);
+        continue;
+      }
+      if (line.match(/^##\s+(.+)$/)) {
+        processed.push(`<h2 style="font-weight: bold; font-size: 16px; margin: 14px 0 8px 0;">${line.replace(/^##\s+/, '')}</h2>`);
+        continue;
+      }
+      if (line.match(/^#\s+(.+)$/)) {
+        processed.push(`<h1 style="font-weight: bold; font-size: 18px; margin: 16px 0 10px 0;">${line.replace(/^#\s+/, '')}</h1>`);
+        continue;
+      }
+
+      // Handle horizontal rules
+      if (line.trim() === '---') {
+        processed.push('<hr style="margin: 14px 0; border: none; border-top: 1px solid rgba(255, 255, 255, 0.2);" />');
+        continue;
+      }
+
+      // Handle bold text
+      line = line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+      // Handle empty lines
+      if (line.trim() === '') {
+        processed.push('<div style="height: 10px;"></div>');
+        continue;
+      }
+
+      // Regular text
+      processed.push(`<div style="line-height: 1.7; margin: 2px 0;">${line}</div>`);
+    }
+
+    // Close any open tags
+    if (inList) processed.push('</ul>');
+    if (inExampleBlock) processed.push('</div>');
+
+    return processed.join('');
   };
 
   return (
