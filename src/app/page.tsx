@@ -99,28 +99,35 @@ export default function HomePage() {
               {/* Features */}
               <div className="relative z-10 mb-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                  <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
-                    <div className="text-2xl mb-2">💰</div>
-                    <div className="text-xs font-semibold text-white/80">Revenue & Profit Based</div>
-                  </div>
-                  <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
-                    <div className="text-2xl mb-2">📈</div>
-                    <div className="text-xs font-semibold text-white/80">Industry Benchmarks</div>
-                  </div>
-                  <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
-                    <div className="text-2xl mb-2">🎯</div>
-                    <div className="text-xs font-semibold text-white/80">Singapore SME Focus</div>
-                  </div>
+                  {[
+                    { icon: "💰", title: "Revenue & Profit Based", delay: "0s" },
+                    { icon: "📈", title: "Industry Benchmarks", delay: "0.1s" },
+                    { icon: "🎯", title: "Singapore SME Focus", delay: "0.2s" },
+                  ].map((feature, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-xl transition-all hover:scale-105 hover:bg-white/8"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.05)",
+                        animation: `fadeSlideIn 0.5s ease-out ${feature.delay} both`,
+                      }}
+                    >
+                      <div className="text-2xl mb-2">{feature.icon}</div>
+                      <div className="text-xs font-semibold text-white/80">{feature.title}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               {/* CTA */}
               <div className="relative z-10 text-center">
                 <div
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-base font-bold transition-all"
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-base font-bold transition-all hover:scale-110 active:scale-95 shadow-lg"
                   style={{
                     background: `linear-gradient(135deg, ${agent.color}, ${agent.color}cc)`,
                     color: "#000",
+                    boxShadow: `0 8px 32px ${agent.color}44`,
                   }}
                 >
                   Start Valuation Consultation

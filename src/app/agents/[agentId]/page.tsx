@@ -4,6 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getAgentById } from "@/lib/agents";
 import type { Message, AgentId, ValuationResult, ValuationRecord } from "@/types";
+import { useToast } from "@/hooks/useToast";
+import { ToastContainer } from "@/components/Toast";
+import { ValuationSkeleton } from "@/components/LoadingSkeleton";
+import { ProgressTracker } from "@/components/ProgressTracker";
 
 // Typing Indicator Component
 function TypingIndicator({ color }: { color: string }) {
@@ -97,32 +101,60 @@ function ValuationDisplay({
   onExport: () => void;
   saving: boolean;
 }) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   return (
     <div
-      className="rounded-2xl p-6 mb-4 border"
+      className="rounded-2xl p-6 mb-4 border fade-slide-in"
       style={{
-        background: "rgba(255,255,255,0.03)",
-        borderColor: `${agentColor}44`,
+        background: `linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))`,
+        borderColor: `${agentColor}66`,
+        boxShadow: `0 8px 32px ${agentColor}22`,
+        animation: "slideInUp 0.5s ease-out",
       }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold">📊 Valuation Result</h3>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+            style={{
+              background: `${agentColor}22`,
+              border: `2px solid ${agentColor}`,
+            }}
+          >
+            📊
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">Valuation Result</h3>
+            <p className="text-xs text-white/50">
+              {valuation.input.businessName || "Business Valuation"}
+            </p>
+          </div>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={onSave}
             disabled={saving}
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105 active:scale-95"
             style={{
-              background: saving ? "rgba(255,255,255,0.1)" : `${agentColor}33`,
+              background: saving ? "rgba(255,255,255,0.1)" : `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
               border: `1px solid ${agentColor}`,
-              color: "#fff",
+              color: saving ? "rgba(255,255,255,0.5)" : "#000",
+              cursor: saving ? "not-allowed" : "pointer",
             }}
           >
-            {saving ? "Saving..." : "💾 Save"}
+            {saving ? (
+              <>
+                <span className="inline-block animate-spin mr-2">⏳</span>
+                Saving...
+              </>
+            ) : (
+              "💾 Save"
+            )}
           </button>
           <button
             onClick={onExport}
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105 active:scale-95"
             style={{
               background: `${agentColor}33`,
               border: `1px solid ${agentColor}`,
@@ -134,30 +166,158 @@ function ValuationDisplay({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
-          <div className="text-xs text-white/50 mb-1">🔻 Conservative</div>
-          <div className="text-xl font-bold" style={{ color: agentColor }}>
-            SGD ${valuation.conservative.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+      {/* Main Valuations - 3 Tiers */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {[
+          { label: "Conservative", value: valuation.conservative, icon: "🔻", opacity: "0.7" },
+          { label: "Fair Market", value: valuation.fairMarket, icon: "⚖️", opacity: "1" },
+          { label: "Optimistic", value: valuation.optimistic, icon: "🔺", opacity: "0.7" },
+        ].map((tier, idx) => (
+          <div
+            key={tier.label}
+            className="relative p-5 rounded-xl transition-all hover:scale-105"
+            style={{
+              background: idx === 1
+                ? `linear-gradient(135deg, ${agentColor}22, ${agentColor}11)`
+                : "rgba(255,255,255,0.05)",
+              border: idx === 1
+                ? `2px solid ${agentColor}`
+                : "1px solid rgba(255,255,255,0.1)",
+              animation: `scaleIn 0.5s ease-out ${idx * 0.1}s both`,
+            }}
+          >
+            {idx === 1 && (
+              <div
+                className="absolute -top-2 -right-2 px-2 py-1 rounded-full text-[10px] font-bold"
+                style={{
+                  background: `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
+                  color: "#000",
+                }}
+              >
+                RECOMMENDED
+              </div>
+            )}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-2xl">{tier.icon}</span>
+              {idx === 1 && (
+                <div className="flex gap-0.5">
+                  {[1,2,3].map(i => (
+                    <div
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: agentColor }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="text-xs text-white/60 font-semibold mb-1 uppercase tracking-wide">
+              {tier.label}
+            </div>
+            <div
+              className="text-2xl md:text-3xl font-bold font-mono"
+              style={{ color: agentColor, opacity: tier.opacity }}
+            >
+              ${tier.value.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+            </div>
+            <div className="text-[10px] text-white/40 mt-1">SGD</div>
           </div>
-        </div>
-        <div className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
-          <div className="text-xs text-white/50 mb-1">⚖️ Fair Market</div>
-          <div className="text-xl font-bold" style={{ color: agentColor }}>
-            SGD ${valuation.fairMarket.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-          </div>
-        </div>
-        <div className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
-          <div className="text-xs text-white/50 mb-1">🔺 Optimistic</div>
-          <div className="text-xl font-bold" style={{ color: agentColor }}>
-            SGD ${valuation.optimistic.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="text-sm text-white/70">
-        <strong>Methodology:</strong> {valuation.methods.map(m => m.method).join(", ")}
+      {/* Methodology Details */}
+      <div
+        className="rounded-xl p-4 mb-4 cursor-pointer transition-all hover:bg-white/5"
+        style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+        }}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-semibold text-white/80">
+            📐 Methodology ({valuation.methods.length} methods)
+          </div>
+          <div className="text-xl transition-transform" style={{
+            transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+          }}>
+            ▼
+          </div>
+        </div>
+
+        {isExpanded && (
+          <div className="mt-4 space-y-2 fade-slide-in">
+            {valuation.methods.map((method, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between py-2 px-3 rounded-lg"
+                style={{ background: "rgba(255,255,255,0.03)" }}
+              >
+                <span className="text-sm text-white/70">{method.method}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-white/50">
+                    Weight: {(method.weight * 100).toFixed(0)}%
+                  </span>
+                  <span className="text-sm font-mono font-bold" style={{ color: agentColor }}>
+                    ${method.value.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Insights */}
+      {(valuation.positiveFactors.length > 0 || valuation.riskFactors.length > 0) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {valuation.positiveFactors.length > 0 && (
+            <div
+              className="p-4 rounded-xl"
+              style={{
+                background: "rgba(0,212,170,0.08)",
+                border: "1px solid rgba(0,212,170,0.2)",
+              }}
+            >
+              <div className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <span>✅</span>
+                <span>Strengths</span>
+              </div>
+              <ul className="text-xs text-white/70 space-y-1">
+                {valuation.positiveFactors.slice(0, 3).map((factor, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">•</span>
+                    <span>{factor}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {valuation.riskFactors.length > 0 && (
+            <div
+              className="p-4 rounded-xl"
+              style={{
+                background: "rgba(255,107,53,0.08)",
+                border: "1px solid rgba(255,107,53,0.2)",
+              }}
+            >
+              <div className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <span>⚠️</span>
+                <span>Risk Factors</span>
+              </div>
+              <ul className="text-xs text-white/70 space-y-1">
+                {valuation.riskFactors.slice(0, 3).map((factor, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-orange-400 mt-0.5">•</span>
+                    <span>{factor}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -172,68 +332,197 @@ function HistoryModal({
   onClose: () => void;
   agentColor: string;
 }) {
+  const [sortBy, setSortBy] = useState<"date" | "value">("date");
+  const [filterIndustry, setFilterIndustry] = useState<string>("all");
+
+  const industries = ["all", ...Array.from(new Set(history.map(h => h.input.industry)))];
+
+  const filteredHistory = history
+    .filter(h => filterIndustry === "all" || h.input.industry === filterIndustry)
+    .sort((a, b) => {
+      if (sortBy === "date") {
+        return new Date(b.created).getTime() - new Date(a.created).getTime();
+      }
+      return b.fairMarket - a.fairMarket;
+    });
+
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
       onClick={onClose}
+      style={{ animation: "fadeIn 0.2s ease-out" }}
     >
       <div
-        className="bg-background rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden border-2"
-        style={{ borderColor: agentColor }}
+        className="bg-background rounded-2xl max-w-5xl w-full max-h-[85vh] overflow-hidden border-2 shadow-2xl"
+        style={{
+          borderColor: agentColor,
+          animation: "scaleIn 0.3s ease-out",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div
           className="p-6 border-b flex items-center justify-between"
-          style={{ borderColor: `${agentColor}33` }}
+          style={{
+            borderColor: `${agentColor}33`,
+            background: `linear-gradient(135deg, ${agentColor}11, transparent)`,
+          }}
         >
-          <h2 className="text-xl font-bold">📚 Valuation History</h2>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+              style={{
+                background: `${agentColor}22`,
+                border: `2px solid ${agentColor}`,
+              }}
+            >
+              📚
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Valuation History</h2>
+              <p className="text-sm text-white/50">
+                {filteredHistory.length} {filteredHistory.length === 1 ? "record" : "records"} found
+              </p>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="text-2xl hover:opacity-70 transition-opacity"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl hover:bg-white/10 transition-colors"
           >
             ×
           </button>
         </div>
 
-        <div className="overflow-y-auto p-6" style={{ maxHeight: "calc(80vh - 100px)" }}>
-          {history.length === 0 ? (
-            <div className="text-center py-12 text-white/50">
-              No valuation history found
+        {/* Filters */}
+        {history.length > 0 && (
+          <div
+            className="p-4 border-b flex items-center gap-4"
+            style={{ borderColor: "rgba(255,255,255,0.08)" }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-white/60">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as "date" | "value")}
+                className="px-3 py-1.5 rounded-lg text-sm outline-none cursor-pointer"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: `1px solid ${agentColor}44`,
+                }}
+              >
+                <option value="date">Latest First</option>
+                <option value="value">Highest Value</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-white/60">Industry:</span>
+              <select
+                value={filterIndustry}
+                onChange={(e) => setFilterIndustry(e.target.value)}
+                className="px-3 py-1.5 rounded-lg text-sm outline-none cursor-pointer"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: `1px solid ${agentColor}44`,
+                }}
+              >
+                {industries.map(ind => (
+                  <option key={ind} value={ind}>
+                    {ind === "all" ? "All Industries" : ind}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Records */}
+        <div className="overflow-y-auto p-6" style={{ maxHeight: "calc(85vh - 200px)" }}>
+          {filteredHistory.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4 opacity-20">📊</div>
+              <div className="text-lg text-white/50 mb-2">No valuation history found</div>
+              <div className="text-sm text-white/30">
+                {filterIndustry !== "all"
+                  ? "Try selecting a different industry filter"
+                  : "Start a new valuation to see records here"}
+              </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {history.map((record) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredHistory.map((record, idx) => (
                 <div
                   key={record.id}
-                  className="p-4 rounded-lg border"
+                  className="rounded-xl border p-5 hover:scale-[1.02] transition-all cursor-pointer"
                   style={{
                     background: "rgba(255,255,255,0.03)",
                     borderColor: "rgba(255,255,255,0.1)",
+                    animation: `fadeSlideIn 0.3s ease-out ${idx * 0.05}s both`,
                   }}
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <div className="font-bold">{record.input.businessName || "Unnamed Business"}</div>
-                      <div className="text-sm text-white/50">
-                        {new Date(record.created).toLocaleDateString("en-SG")}
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <div className="font-bold text-lg mb-1">
+                        {record.input.businessName || "Unnamed Business"}
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-white/50">Fair Market</div>
-                      <div className="text-lg font-bold" style={{ color: agentColor }}>
-                        SGD ${record.fairMarket.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      <div className="flex items-center gap-2 text-xs text-white/50">
+                        <span>📅 {new Date(record.created).toLocaleDateString("en-SG", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}</span>
+                        <span>•</span>
+                        <span className="px-2 py-0.5 rounded-full" style={{
+                          background: `${agentColor}22`,
+                          color: agentColor,
+                        }}>
+                          {record.input.industry}
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
+
+                  {/* Valuation Summary */}
+                  <div
+                    className="rounded-lg p-3 mb-3"
+                    style={{
+                      background: `linear-gradient(135deg, ${agentColor}15, ${agentColor}08)`,
+                      border: `1px solid ${agentColor}33`,
+                    }}
+                  >
+                    <div className="text-xs text-white/50 mb-1">Fair Market Value</div>
+                    <div className="text-2xl font-bold font-mono" style={{ color: agentColor }}>
+                      ${record.fairMarket.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+                    </div>
+                    <div className="text-[10px] text-white/40">SGD</div>
+                  </div>
+
+                  {/* Business Metrics */}
+                  <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <span className="text-white/50">Revenue:</span> SGD ${record.input.annualRevenue.toLocaleString()}
+                      <div className="text-white/40 mb-1">Annual Revenue</div>
+                      <div className="font-semibold">
+                        ${record.input.annualRevenue.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+                      </div>
                     </div>
                     <div>
-                      <span className="text-white/50">Profit:</span> SGD ${record.input.netProfit.toLocaleString()}
+                      <div className="text-white/40 mb-1">Net Profit</div>
+                      <div className="font-semibold">
+                        ${record.input.netProfit.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+                      </div>
                     </div>
                     <div>
-                      <span className="text-white/50">Industry:</span> {record.input.industry}
+                      <div className="text-white/40 mb-1">Years Operating</div>
+                      <div className="font-semibold">
+                        {record.input.yearsInOperation} {record.input.yearsInOperation === 1 ? "year" : "years"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-white/40 mb-1">Growth Trend</div>
+                      <div className="font-semibold capitalize">
+                        {record.input.growthTrend === "growing" ? "📈" : record.input.growthTrend === "stable" ? "➡️" : "📉"}
+                        {" "}{record.input.growthTrend}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -251,6 +540,7 @@ export default function AgentChatPage() {
   const router = useRouter();
   const agentId = params.agentId as string;
   const agent = getAgentById(agentId as AgentId);
+  const toast = useToast();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -263,6 +553,9 @@ export default function AgentChatPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<ValuationRecord[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const TOTAL_QUESTIONS = 7; // Expected number of questions in the conversation
+  const userMessageCount = messages.filter(m => m.role === "user").length;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -354,6 +647,8 @@ export default function AgentChatPage() {
 
   const calculateValuation = async () => {
     setProcessing(true);
+    toast.info("Analyzing conversation data...");
+
     try {
       // Step 1: Extract data from conversation
       const extractResponse = await fetch("/api/valuation/extract", {
@@ -364,9 +659,12 @@ export default function AgentChatPage() {
 
       const extractData = await extractResponse.json();
       if (!extractData.success) {
-        alert("Could not extract valuation data. Please provide all required information.");
+        toast.error("Could not extract valuation data. Please provide all required information.");
+        setProcessing(false);
         return;
       }
+
+      toast.info("Calculating valuation...");
 
       // Step 2: Calculate valuation
       const calcResponse = await fetch("/api/valuation/calculate", {
@@ -378,12 +676,13 @@ export default function AgentChatPage() {
       const calcData = await calcResponse.json();
       if (calcData.success) {
         setValuationResult(calcData.data);
+        toast.success("Valuation calculated successfully!");
       } else {
-        alert("Failed to calculate valuation: " + calcData.error);
+        toast.error("Failed to calculate: " + calcData.error);
       }
     } catch (error) {
       console.error("Valuation error:", error);
-      alert("An error occurred while calculating valuation");
+      toast.error("An error occurred while calculating valuation");
     } finally {
       setProcessing(false);
     }
@@ -402,13 +701,13 @@ export default function AgentChatPage() {
 
       const data = await response.json();
       if (data.success) {
-        alert("✅ Valuation saved successfully!");
+        toast.success("Valuation saved successfully!");
       } else {
-        alert("Failed to save: " + data.error);
+        toast.error("Failed to save: " + data.error);
       }
     } catch (error) {
       console.error("Save error:", error);
-      alert("An error occurred while saving");
+      toast.error("An error occurred while saving");
     } finally {
       setSaving(false);
     }
@@ -416,6 +715,8 @@ export default function AgentChatPage() {
 
   const exportPDF = async () => {
     if (!valuationResult) return;
+
+    toast.info("Generating PDF report...");
 
     try {
       const response = await fetch("/api/valuation/export-pdf", {
@@ -430,29 +731,39 @@ export default function AgentChatPage() {
         printWindow.document.write(html);
         printWindow.document.close();
         setTimeout(() => printWindow.print(), 500);
+        toast.success("PDF report opened in new window");
+      } else {
+        toast.warning("Please allow popups to export PDF");
       }
     } catch (error) {
       console.error("Export error:", error);
-      alert("Failed to export PDF");
+      toast.error("Failed to export PDF");
     }
   };
 
   const loadHistory = async () => {
+    toast.info("Loading history...");
     try {
       const response = await fetch("/api/valuation/history");
       const data = await response.json();
       if (data.success) {
         setHistory(data.data.valuations);
         setShowHistory(true);
+        toast.success(`Loaded ${data.data.valuations.length} records`);
+      } else {
+        toast.error("Failed to load history");
       }
     } catch (error) {
       console.error("History error:", error);
-      alert("Failed to load history");
+      toast.error("Failed to load history");
     }
   };
 
   return (
     <div className="flex flex-col h-screen bg-background">
+      {/* Toast Container */}
+      <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
+
       {/* Header */}
       <div
         className="px-5 py-4 border-b flex items-center gap-3"
@@ -463,7 +774,7 @@ export default function AgentChatPage() {
       >
         <button
           onClick={() => router.push("/")}
-          className="px-3 py-1.5 text-sm rounded-lg border transition-colors"
+          className="px-3 py-1.5 text-sm rounded-lg border transition-all hover:scale-105 active:scale-95"
           style={{
             background: "rgba(255,255,255,0.08)",
             borderColor: "rgba(255,255,255,0.15)",
@@ -494,18 +805,30 @@ export default function AgentChatPage() {
             <>
               <button
                 onClick={calculateValuation}
-                disabled={processing}
-                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all"
+                disabled={processing || valuationResult !== null}
+                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  background: processing ? "rgba(255,255,255,0.1)" : `${agent.color}33`,
+                  background: processing || valuationResult !== null
+                    ? "rgba(255,255,255,0.1)"
+                    : `linear-gradient(135deg, ${agent.color}, ${agent.color}cc)`,
                   border: `1px solid ${agent.color}`,
+                  color: processing || valuationResult !== null ? "rgba(255,255,255,0.5)" : "#000",
                 }}
               >
-                {processing ? "Processing..." : "🧮 Calculate"}
+                {processing ? (
+                  <>
+                    <span className="inline-block animate-spin mr-2">⏳</span>
+                    Processing...
+                  </>
+                ) : valuationResult ? (
+                  "✓ Calculated"
+                ) : (
+                  "🧮 Calculate"
+                )}
               </button>
               <button
                 onClick={loadHistory}
-                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all"
+                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all hover:scale-105 active:scale-95"
                 style={{
                   background: `${agent.color}22`,
                   border: `1px solid ${agent.color}44`,
@@ -522,7 +845,12 @@ export default function AgentChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-5">
         {!started ? (
           <div className="flex flex-col items-center justify-center h-full gap-4">
-            <div className="text-6xl">{agent.icon}</div>
+            <div
+              className="text-6xl mb-2"
+              style={{ animation: "scaleIn 0.5s ease-out" }}
+            >
+              {agent.icon}
+            </div>
             <div className="font-display text-2xl font-bold text-center">
               {agent.name} Agent
             </div>
@@ -531,10 +859,11 @@ export default function AgentChatPage() {
             </div>
             <button
               onClick={startChat}
-              className="mt-2 px-8 py-3 rounded-full font-bold text-sm transition-transform hover:scale-105"
+              className="mt-2 px-8 py-3 rounded-full font-bold text-sm transition-all hover:scale-110 active:scale-95 shadow-lg"
               style={{
                 background: `linear-gradient(135deg, ${agent.color}, ${agent.color}aa)`,
                 color: "#000",
+                boxShadow: `0 8px 24px ${agent.color}44`,
               }}
             >
               Start Conversation
@@ -542,11 +871,21 @@ export default function AgentChatPage() {
           </div>
         ) : (
           <>
+            {/* Progress Tracker */}
+            {userMessageCount > 0 && userMessageCount < TOTAL_QUESTIONS && !valuationResult && (
+              <ProgressTracker
+                current={userMessageCount}
+                total={TOTAL_QUESTIONS}
+                agentColor={agent.color}
+              />
+            )}
+
             {messages.map((msg, i) => (
               <ChatBubble key={i} message={msg} agentColor={agent.color} />
             ))}
+
             {loading && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 fade-slide-in">
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-sm"
                   style={{
@@ -567,6 +906,13 @@ export default function AgentChatPage() {
                 </div>
               </div>
             )}
+
+            {/* Processing Skeleton */}
+            {processing && !valuationResult && (
+              <ValuationSkeleton agentColor={agent.color} />
+            )}
+
+            {/* Valuation Result */}
             {valuationResult && (
               <ValuationDisplay
                 valuation={valuationResult}
@@ -576,6 +922,7 @@ export default function AgentChatPage() {
                 saving={saving}
               />
             )}
+
             <div ref={bottomRef} />
           </>
         )}
