@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getAgentById } from "@/lib/agents";
 import type { Message, AgentId, ValuationResult, ValuationRecord } from "@/types";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/useToast";
 import { ToastContainer } from "@/components/Toast";
 import { ValuationSkeleton } from "@/components/LoadingSkeleton";
 import { ProgressTracker } from "@/components/ProgressTracker";
+import { apiCache } from "@/lib/cache";
 
 // Typing Indicator Component
 function TypingIndicator({ color }: { color: string }) {
@@ -27,8 +28,8 @@ function TypingIndicator({ color }: { color: string }) {
   );
 }
 
-// Chat Bubble Component
-function ChatBubble({
+// Chat Bubble Component (Memoized)
+const ChatBubble = memo(function ChatBubble({
   message,
   agentColor,
 }: {
@@ -85,10 +86,10 @@ function ChatBubble({
       />
     </div>
   );
-}
+});
 
-// Valuation Result Display Component
-function ValuationDisplay({
+// Valuation Result Display Component (Memoized)
+const ValuationDisplay = memo(function ValuationDisplay({
   valuation,
   agentColor,
   onSave,
@@ -320,10 +321,10 @@ function ValuationDisplay({
       )}
     </div>
   );
-}
+});
 
-// History Modal Component
-function HistoryModal({
+// History Modal Component (Memoized)
+const HistoryModal = memo(function HistoryModal({
   history,
   onClose,
   agentColor,
@@ -533,7 +534,7 @@ function HistoryModal({
       </div>
     </div>
   );
-}
+});
 
 export default function AgentChatPage() {
   const params = useParams();
@@ -557,28 +558,10 @@ export default function AgentChatPage() {
   const TOTAL_QUESTIONS = 7; // Expected number of questions in the conversation
   const userMessageCount = messages.filter(m => m.role === "user").length;
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  // Define all hooks before any conditional returns
+  const startChat = useCallback(async () => {
+    if (!agent) return;
 
-  if (!agent) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4">❌</div>
-          <h1 className="text-xl font-bold mb-2">Agent Not Found</h1>
-          <button
-            onClick={() => router.push("/")}
-            className="text-sm text-white/50 hover:text-white/80"
-          >
-            ← Back to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const startChat = async () => {
     setStarted(true);
     setLoading(true);
 
@@ -606,10 +589,10 @@ export default function AgentChatPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [agent]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  const sendMessage = useCallback(async () => {
+    if (!agent || !input.trim() || loading) return;
 
     const userMessage = input.trim();
     setInput("");
@@ -643,9 +626,9 @@ export default function AgentChatPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [agent, input, loading, messages, sessionId]);
 
-  const calculateValuation = async () => {
+  const calculateValuation = useCallback(async () => {
     setProcessing(true);
     toast.info("Analyzing conversation data...");
 
@@ -686,9 +669,9 @@ export default function AgentChatPage() {
     } finally {
       setProcessing(false);
     }
-  };
+  }, [messages, toast]);
 
-  const saveValuation = async () => {
+  const saveValuation = useCallback(async () => {
     if (!valuationResult) return;
 
     setSaving(true);
@@ -711,9 +694,9 @@ export default function AgentChatPage() {
     } finally {
       setSaving(false);
     }
-  };
+  }, [valuationResult, toast]);
 
-  const exportPDF = async () => {
+  const exportPDF = useCallback(async () => {
     if (!valuationResult) return;
 
     toast.info("Generating PDF report...");
@@ -739,9 +722,20 @@ export default function AgentChatPage() {
       console.error("Export error:", error);
       toast.error("Failed to export PDF");
     }
-  };
+  }, [valuationResult, toast]);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
+    // Check cache first
+    const cacheKey = "valuation-history";
+    const cached = apiCache.get<ValuationRecord[]>(cacheKey);
+
+    if (cached) {
+      setHistory(cached);
+      setShowHistory(true);
+      toast.success(`Loaded ${cached.length} records from cache`);
+      return;
+    }
+
     toast.info("Loading history...");
     try {
       const response = await fetch("/api/valuation/history");
@@ -749,6 +743,8 @@ export default function AgentChatPage() {
       if (data.success) {
         setHistory(data.data.valuations);
         setShowHistory(true);
+        // Cache for 5 minutes
+        apiCache.set(cacheKey, data.data.valuations, 300000);
         toast.success(`Loaded ${data.data.valuations.length} records`);
       } else {
         toast.error("Failed to load history");
@@ -757,7 +753,29 @@ export default function AgentChatPage() {
       console.error("History error:", error);
       toast.error("Failed to load history");
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  // Early return after all hooks
+  if (!agent) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">❌</div>
+          <h1 className="text-xl font-bold mb-2">Agent Not Found</h1>
+          <button
+            onClick={() => router.push("/")}
+            className="text-sm text-white/50 hover:text-white/80"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-background">

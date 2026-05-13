@@ -11,13 +11,21 @@ export async function GET(request: NextRequest) {
     // Fetch valuations from Airtable
     const valuations = await getValuations(email);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         valuations,
         count: valuations.length,
       },
     });
+
+    // Cache for 5 minutes for better performance
+    response.headers.set(
+      "Cache-Control",
+      "private, max-age=300, stale-while-revalidate=600"
+    );
+
+    return response;
   } catch (error) {
     console.error("Valuation history error:", error);
     return NextResponse.json(
