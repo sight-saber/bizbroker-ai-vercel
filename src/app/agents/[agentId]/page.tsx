@@ -291,6 +291,158 @@ const ValuationForm = memo(function ValuationForm({
   );
 });
 
+// Demo Form Component (Read-only)
+const DemoForm = memo(function DemoForm({ agentColor }: { agentColor: string }) {
+  return (
+    <div className="my-4">
+      <div
+        className="rounded-xl p-5 border"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+          borderColor: `${agentColor}44`,
+        }}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <div className="text-lg">📋</div>
+          <div className="text-xs font-semibold text-white/60 uppercase tracking-wide">
+            Example Input Format
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {/* Enterprise Name */}
+          <div>
+            <label className="block text-xs font-semibold mb-1.5 text-white/50">
+              Enterprise Name
+            </label>
+            <div
+              className="px-3 py-2 rounded-lg text-sm"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "#fff",
+              }}
+            >
+              小龙坎火锅店
+            </div>
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-xs font-semibold mb-1.5 text-white/50">
+              Industry
+            </label>
+            <div
+              className="px-3 py-2 rounded-lg text-sm"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "#fff",
+              }}
+            >
+              餐饮/零售 - F&B/Retail
+            </div>
+          </div>
+
+          {/* Annual Revenue & Net Profit */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 text-white/50">
+                Annual Revenue
+              </label>
+              <div
+                className="px-3 py-2 rounded-lg text-sm font-mono"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: agentColor,
+                }}
+              >
+                SGD $1,200,000
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 text-white/50">
+                Net Profit
+              </label>
+              <div
+                className="px-3 py-2 rounded-lg text-sm font-mono"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: agentColor,
+                }}
+              >
+                SGD $180,000
+              </div>
+            </div>
+          </div>
+
+          {/* Years Operating & Asset Value */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 text-white/50">
+                Years Operating
+              </label>
+              <div
+                className="px-3 py-2 rounded-lg text-sm"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "#fff",
+                }}
+              >
+                3 years
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5 text-white/50">
+                Asset Value
+              </label>
+              <div
+                className="px-3 py-2 rounded-lg text-sm font-mono"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: agentColor,
+                }}
+              >
+                SGD $150,000
+              </div>
+            </div>
+          </div>
+
+          {/* Growth Trend */}
+          <div>
+            <label className="block text-xs font-semibold mb-2 text-white/50">
+              Growth Trend
+            </label>
+            <div className="flex gap-2">
+              {[
+                { label: "📈 Growing", active: true },
+                { label: "➡️ Stable", active: false },
+                { label: "📉 Declining", active: false },
+              ].map((trend, idx) => (
+                <div
+                  key={idx}
+                  className="flex-1 px-3 py-2 rounded-lg text-center text-xs font-semibold"
+                  style={{
+                    background: trend.active ? `${agentColor}22` : "rgba(255,255,255,0.03)",
+                    border: trend.active ? `1.5px solid ${agentColor}` : "1px solid rgba(255,255,255,0.1)",
+                    color: trend.active ? agentColor : "rgba(255,255,255,0.4)",
+                  }}
+                >
+                  {trend.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 // Chat Bubble Component (Memoized)
 const ChatBubble = memo(function ChatBubble({
   message,
@@ -301,16 +453,52 @@ const ChatBubble = memo(function ChatBubble({
 }) {
   const isUser = message.role === "user";
 
+  // Check if message contains the example format
+  const hasExampleFormat = message.content.includes("Enterprise Name: [小龙坎火锅店]");
+
   // Enhanced markdown rendering
   const renderContent = (content: string) => {
+    // If it's the opening message with example, extract parts
+    if (hasExampleFormat) {
+      const parts = content.split("```");
+      if (parts.length >= 2) {
+        // Return content before code block, demo form, and content after
+        const beforeExample = parts[0];
+        const afterExample = parts.length > 2 ? parts.slice(2).join("```") : "";
+
+        return (
+          <>
+            <div dangerouslySetInnerHTML={{ __html: processText(beforeExample) }} />
+            <DemoForm agentColor={agentColor} />
+            {afterExample && <div dangerouslySetInnerHTML={{ __html: processText(afterExample) }} />}
+          </>
+        );
+      }
+    }
+
+    // Regular markdown rendering
+    return <div dangerouslySetInnerHTML={{ __html: processText(content) }} />;
+  };
+
+  const processText = (content: string) => {
     // Split content into lines for better processing
     const lines = content.split('\n');
     const processed: string[] = [];
     let inList = false;
     let inExampleBlock = false;
+    let skipCodeBlock = false;
 
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
+
+      // Skip code blocks (they're rendered separately as DemoForm)
+      if (line.trim() === '```' || line.trim().startsWith('```')) {
+        skipCodeBlock = !skipCodeBlock;
+        continue;
+      }
+      if (skipCodeBlock) {
+        continue;
+      }
 
       // Handle example quotes (lines starting and ending with quotes)
       if (line.trim().startsWith('"') && line.trim().endsWith('"')) {
@@ -411,8 +599,9 @@ const ChatBubble = memo(function ChatBubble({
           border: isUser ? "none" : "1px solid rgba(255,255,255,0.1)",
           color: "#fff",
         }}
-        dangerouslySetInnerHTML={{ __html: renderContent(message.content) }}
-      />
+      >
+        {renderContent(message.content)}
+      </div>
     </div>
   );
 });
