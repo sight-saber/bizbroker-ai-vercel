@@ -1538,7 +1538,7 @@ export default function AgentChatPage() {
               <button
                 onClick={calculateValuation}
                 disabled={processing || valuationResult !== null}
-                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs rounded-lg font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   background: processing || valuationResult !== null
                     ? "rgba(255,255,255,0.1)"
@@ -1549,7 +1549,7 @@ export default function AgentChatPage() {
               >
                 {processing ? (
                   <>
-                    <span className="inline-block animate-spin mr-2">⏳</span>
+                    <span className="inline-block animate-spin mr-1.5">⏳</span>
                     Processing...
                   </>
                 ) : valuationResult ? (
@@ -1560,7 +1560,7 @@ export default function AgentChatPage() {
               </button>
               <button
                 onClick={loadHistory}
-                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all hover:scale-105 active:scale-95"
+                className="px-3 py-1.5 text-xs rounded-lg font-semibold transition-all hover:scale-105 active:scale-95"
                 style={{
                   background: `${agent.color}22`,
                   border: `1px solid ${agent.color}44`,
