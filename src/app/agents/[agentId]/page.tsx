@@ -29,6 +29,268 @@ function TypingIndicator({ color }: { color: string }) {
   );
 }
 
+// Valuation Form Component
+const ValuationForm = memo(function ValuationForm({
+  agentColor,
+  onSubmit,
+  onCancel,
+}: {
+  agentColor: string;
+  onSubmit: (data: any) => void;
+  onCancel: () => void;
+}) {
+  const [formData, setFormData] = useState({
+    businessName: "",
+    industry: "fnb_retail",
+    annualRevenue: "",
+    netProfit: "",
+    yearsInOperation: "3",
+    assetValue: "",
+    growthTrend: "stable",
+  });
+
+  const industries = [
+    { value: "fnb_retail", label: "餐饮/零售 - F&B/Retail" },
+    { value: "services", label: "服务业 - Services" },
+    { value: "tech_saas", label: "科技/软件 - Tech/SaaS" },
+    { value: "education", label: "教育 - Education" },
+    { value: "manufacturing", label: "制造业 - Manufacturing" },
+    { value: "ecommerce", label: "电商 - E-commerce" },
+    { value: "healthcare", label: "医疗保健 - Healthcare" },
+  ];
+
+  const yearOptions = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="mb-4 fade-slide-in">
+      <div
+        className="rounded-2xl p-6 border"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))",
+          borderColor: `${agentColor}66`,
+        }}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+              style={{
+                background: `${agentColor}22`,
+                border: `2px solid ${agentColor}`,
+              }}
+            >
+              📋
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">Quick Valuation Form</h3>
+              <p className="text-xs text-white/50">Fill in your business details</p>
+            </div>
+          </div>
+          <button
+            onClick={onCancel}
+            className="text-white/50 hover:text-white/80 text-sm"
+          >
+            Use chat instead →
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Enterprise Name */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              Enterprise Name <span style={{ color: agentColor }}>*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.businessName}
+              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+              placeholder="e.g., 小龙坎火锅店"
+              className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: `1px solid ${agentColor}44`,
+              }}
+            />
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              Industry <span style={{ color: agentColor }}>*</span>
+            </label>
+            <select
+              required
+              value={formData.industry}
+              onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-lg text-sm outline-none cursor-pointer"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: `1px solid ${agentColor}44`,
+              }}
+            >
+              {industries.map((ind) => (
+                <option key={ind.value} value={ind.value}>
+                  {ind.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Annual Revenue & Net Profit */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Annual Revenue (SGD) <span style={{ color: agentColor }}>*</span>
+              </label>
+              <input
+                type="number"
+                required
+                value={formData.annualRevenue}
+                onChange={(e) => setFormData({ ...formData, annualRevenue: e.target.value })}
+                placeholder="e.g., 1200000"
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.07)",
+                  border: `1px solid ${agentColor}44`,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Net Profit (SGD) <span style={{ color: agentColor }}>*</span>
+              </label>
+              <input
+                type="number"
+                required
+                value={formData.netProfit}
+                onChange={(e) => setFormData({ ...formData, netProfit: e.target.value })}
+                placeholder="e.g., 180000"
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.07)",
+                  border: `1px solid ${agentColor}44`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Years Operating & Asset Value */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Years Operating <span style={{ color: agentColor }}>*</span>
+              </label>
+              <select
+                required
+                value={formData.yearsInOperation}
+                onChange={(e) => setFormData({ ...formData, yearsInOperation: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none cursor-pointer"
+                style={{
+                  background: "rgba(255,255,255,0.07)",
+                  border: `1px solid ${agentColor}44`,
+                }}
+              >
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year} {year === 1 ? "year" : "years"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Asset Value (SGD) <span style={{ color: agentColor }}>*</span>
+              </label>
+              <input
+                type="number"
+                required
+                value={formData.assetValue}
+                onChange={(e) => setFormData({ ...formData, assetValue: e.target.value })}
+                placeholder="e.g., 150000"
+                className="w-full px-4 py-2.5 rounded-lg text-sm outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.07)",
+                  border: `1px solid ${agentColor}44`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Growth Trend */}
+          <div>
+            <label className="block text-sm font-semibold mb-3">
+              Growth Trend <span style={{ color: agentColor }}>*</span>
+            </label>
+            <div className="flex gap-4">
+              {[
+                { value: "growing", label: "📈 Growing", color: "#00D4AA" },
+                { value: "stable", label: "➡️ Stable", color: "#FFB800" },
+                { value: "declining", label: "📉 Declining", color: "#FF6B35" },
+              ].map((trend) => (
+                <label
+                  key={trend.value}
+                  className="flex items-center gap-2 cursor-pointer px-4 py-2.5 rounded-lg transition-all"
+                  style={{
+                    background: formData.growthTrend === trend.value
+                      ? `${trend.color}22`
+                      : "rgba(255,255,255,0.05)",
+                    border: formData.growthTrend === trend.value
+                      ? `2px solid ${trend.color}`
+                      : "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="growthTrend"
+                    value={trend.value}
+                    checked={formData.growthTrend === trend.value}
+                    onChange={(e) => setFormData({ ...formData, growthTrend: e.target.value })}
+                    className="hidden"
+                  />
+                  <span className="text-sm font-semibold">{trend.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="submit"
+              className="flex-1 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95"
+              style={{
+                background: `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
+                color: "#000",
+              }}
+            >
+              🧮 Calculate Valuation
+            </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105 active:scale-95"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.2)",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+});
+
 // Chat Bubble Component (Memoized)
 const ChatBubble = memo(function ChatBubble({
   message,
@@ -620,6 +882,7 @@ export default function AgentChatPage() {
   const [saving, setSaving] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<ValuationRecord[]>([]);
+  const [showForm, setShowForm] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const TOTAL_QUESTIONS = 7; // Expected number of questions in the conversation
@@ -822,6 +1085,58 @@ export default function AgentChatPage() {
     }
   }, [toast]);
 
+  const handleFormSubmit = useCallback(async (formData: any) => {
+    setShowForm(false);
+    setProcessing(true);
+    toast.info("Calculating valuation from form data...");
+
+    try {
+      // Prepare valuation input
+      const valuationInput = {
+        businessName: formData.businessName,
+        industry: formData.industry,
+        annualRevenue: parseFloat(formData.annualRevenue),
+        netProfit: parseFloat(formData.netProfit),
+        ebitda: parseFloat(formData.netProfit) * 1.2, // Rough estimate
+        yearsInOperation: parseInt(formData.yearsInOperation),
+        assetValue: parseFloat(formData.assetValue),
+        growthTrend: formData.growthTrend,
+      };
+
+      // Add a message to chat showing the form data
+      const summaryMessage = `📋 Form submitted with:\n\n` +
+        `**Business Name:** ${formData.businessName}\n` +
+        `**Industry:** ${formData.industry}\n` +
+        `**Annual Revenue:** SGD $${parseFloat(formData.annualRevenue).toLocaleString()}\n` +
+        `**Net Profit:** SGD $${parseFloat(formData.netProfit).toLocaleString()}\n` +
+        `**Years Operating:** ${formData.yearsInOperation} years\n` +
+        `**Asset Value:** SGD $${parseFloat(formData.assetValue).toLocaleString()}\n` +
+        `**Growth Trend:** ${formData.growthTrend}`;
+
+      setMessages([...messages, { role: "user", content: summaryMessage }]);
+
+      // Calculate valuation
+      const calcResponse = await fetch("/api/valuation/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(valuationInput),
+      });
+
+      const calcData = await calcResponse.json();
+      if (calcData.success) {
+        setValuationResult(calcData.data);
+        toast.success("Valuation calculated successfully!");
+      } else {
+        toast.error("Failed to calculate: " + calcData.error);
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      toast.error("An error occurred while calculating valuation");
+    } finally {
+      setProcessing(false);
+    }
+  }, [messages, toast]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -948,17 +1263,34 @@ export default function AgentChatPage() {
               <InputGuide agentColor={agent.color} />
             </div>
 
-            <button
-              onClick={startChat}
-              className="mt-2 px-8 py-3 rounded-full font-bold text-sm transition-all hover:scale-110 active:scale-95 shadow-lg"
-              style={{
-                background: `linear-gradient(135deg, ${agent.color}, ${agent.color}aa)`,
-                color: "#000",
-                boxShadow: `0 8px 24px ${agent.color}44`,
-              }}
-            >
-              Start Valuation Consultation
-            </button>
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={startChat}
+                className="px-8 py-3 rounded-full font-bold text-sm transition-all hover:scale-110 active:scale-95 shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, ${agent.color}, ${agent.color}aa)`,
+                  color: "#000",
+                  boxShadow: `0 8px 24px ${agent.color}44`,
+                }}
+              >
+                💬 Start Chat Consultation
+              </button>
+              <button
+                onClick={() => {
+                  setStarted(true);
+                  setShowForm(true);
+                }}
+                className="px-8 py-3 rounded-full font-bold text-sm transition-all hover:scale-110 active:scale-95 shadow-lg"
+                style={{
+                  background: `${agent.color}22`,
+                  border: `2px solid ${agent.color}`,
+                  color: agent.color,
+                  boxShadow: `0 8px 24px ${agent.color}22`,
+                }}
+              >
+                📋 Use Quick Form
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -974,6 +1306,36 @@ export default function AgentChatPage() {
             {messages.map((msg, i) => (
               <ChatBubble key={i} message={msg} agentColor={agent.color} />
             ))}
+
+            {/* Show form option after first assistant message */}
+            {messages.length === 1 && messages[0].role === "assistant" && !showForm && !valuationResult && (
+              <div className="mb-4 fade-slide-in">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/10" />
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all hover:scale-105 active:scale-95"
+                    style={{
+                      background: `${agent.color}22`,
+                      border: `1px solid ${agent.color}66`,
+                      color: agent.color,
+                    }}
+                  >
+                    📋 Use Quick Form Instead
+                  </button>
+                  <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/10" />
+                </div>
+              </div>
+            )}
+
+            {/* Valuation Form */}
+            {showForm && (
+              <ValuationForm
+                agentColor={agent.color}
+                onSubmit={handleFormSubmit}
+                onCancel={() => setShowForm(false)}
+              />
+            )}
 
             {loading && (
               <div className="flex items-center gap-2 fade-slide-in">
