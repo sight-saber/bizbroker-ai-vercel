@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, memo, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getAgentById } from "@/lib/agents";
 import type { Message, AgentId, ValuationResult, ValuationRecord } from "@/types";
@@ -613,12 +613,14 @@ const ValuationDisplay = memo(function ValuationDisplay({
   onSave,
   onExport,
   saving,
+  autoSaved,
 }: {
   valuation: ValuationResult;
   agentColor: string;
   onSave: () => void;
   onExport: () => void;
   saving: boolean;
+  autoSaved?: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -653,13 +655,21 @@ const ValuationDisplay = memo(function ValuationDisplay({
         <div className="flex gap-2">
           <button
             onClick={onSave}
-            disabled={saving}
+            disabled={saving || autoSaved}
             className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105 active:scale-95"
             style={{
-              background: saving ? "rgba(255,255,255,0.1)" : `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
-              border: `1px solid ${agentColor}`,
-              color: saving ? "rgba(255,255,255,0.5)" : "#000",
-              cursor: saving ? "not-allowed" : "pointer",
+              background: autoSaved
+                ? "rgba(0,212,170,0.2)"
+                : saving
+                  ? "rgba(255,255,255,0.1)"
+                  : `linear-gradient(135deg, ${agentColor}, ${agentColor}cc)`,
+              border: `1px solid ${autoSaved ? "#00D4AA" : agentColor}`,
+              color: autoSaved
+                ? "#00D4AA"
+                : saving
+                  ? "rgba(255,255,255,0.5)"
+                  : "#000",
+              cursor: saving || autoSaved ? "not-allowed" : "pointer",
             }}
           >
             {saving ? (
@@ -667,6 +677,8 @@ const ValuationDisplay = memo(function ValuationDisplay({
                 <span className="inline-block animate-spin mr-2">⏳</span>
                 Saving...
               </>
+            ) : autoSaved ? (
+              "✓ Auto-saved"
             ) : (
               "💾 Save"
             )}
@@ -682,6 +694,104 @@ const ValuationDisplay = memo(function ValuationDisplay({
           >
             📄 Export PDF
           </button>
+        </div>
+      </div>
+
+      {/* Input Summary */}
+      <div
+        className="rounded-xl p-5 mb-6"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))",
+          border: "1px solid rgba(255,255,255,0.1)",
+        }}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-lg">📋</span>
+          <span className="text-sm font-bold text-white/80">Business Information</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Business Name */}
+          <div className="md:col-span-2 lg:col-span-1">
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Business Name</div>
+            <div className="text-base font-bold" style={{ color: agentColor }}>
+              {valuation.input.businessName || "N/A"}
+            </div>
+          </div>
+
+          {/* Industry */}
+          <div>
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Industry</div>
+            <div className="text-sm font-semibold">
+              {valuation.input.industry === "fnb_retail" && "餐饮/零售 - F&B/Retail"}
+              {valuation.input.industry === "services" && "服务业 - Services"}
+              {valuation.input.industry === "tech_saas" && "科技/软件 - Tech/SaaS"}
+              {valuation.input.industry === "education" && "教育 - Education"}
+              {valuation.input.industry === "manufacturing" && "制造业 - Manufacturing"}
+              {valuation.input.industry === "ecommerce" && "电商 - E-commerce"}
+              {valuation.input.industry === "healthcare" && "医疗保健 - Healthcare"}
+            </div>
+          </div>
+
+          {/* Growth Trend */}
+          <div>
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Growth Trend</div>
+            <div className="text-sm font-semibold capitalize">
+              {valuation.input.growthTrend === "growing" && "📈 Growing"}
+              {valuation.input.growthTrend === "stable" && "➡️ Stable"}
+              {valuation.input.growthTrend === "declining" && "📉 Declining"}
+            </div>
+          </div>
+
+          {/* Annual Revenue */}
+          <div>
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Annual Revenue</div>
+            <div className="text-sm font-mono font-bold" style={{ color: agentColor }}>
+              SGD ${valuation.input.annualRevenue.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+            </div>
+          </div>
+
+          {/* Net Profit */}
+          <div>
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Net Profit</div>
+            <div className="text-sm font-mono font-bold" style={{ color: agentColor }}>
+              SGD ${valuation.input.netProfit.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+            </div>
+          </div>
+
+          {/* Asset Value */}
+          <div>
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Asset Value</div>
+            <div className="text-sm font-mono font-bold" style={{ color: agentColor }}>
+              SGD ${valuation.input.assetValue.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+            </div>
+          </div>
+
+          {/* Years Operating */}
+          <div>
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Years Operating</div>
+            <div className="text-sm font-semibold">
+              {valuation.input.yearsInOperation} {valuation.input.yearsInOperation === 1 ? "year" : "years"}
+            </div>
+          </div>
+
+          {/* Profit Margin */}
+          <div>
+            <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">Profit Margin</div>
+            <div className="text-sm font-semibold">
+              {((valuation.input.netProfit / valuation.input.annualRevenue) * 100).toFixed(1)}%
+            </div>
+          </div>
+
+          {/* EBITDA (if available) */}
+          {valuation.input.ebitda && (
+            <div>
+              <div className="text-xs text-white/40 mb-1 uppercase tracking-wide">EBITDA</div>
+              <div className="text-sm font-mono font-bold" style={{ color: agentColor }}>
+                SGD ${valuation.input.ebitda.toLocaleString("en-SG", { maximumFractionDigits: 0 })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1072,6 +1182,7 @@ export default function AgentChatPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<ValuationRecord[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [autoSaved, setAutoSaved] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const TOTAL_QUESTIONS = 7; // Expected number of questions in the conversation
@@ -1179,6 +1290,28 @@ export default function AgentChatPage() {
       if (calcData.success) {
         setValuationResult(calcData.data);
         toast.success("Valuation calculated successfully!");
+
+        // Auto-save to Airtable
+        try {
+          toast.info("Saving to database...");
+          const saveResponse = await fetch("/api/valuation/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(calcData.data),
+          });
+
+          const saveData = await saveResponse.json();
+          if (saveData.success) {
+            setAutoSaved(true);
+            toast.success("💾 Automatically saved to database!");
+          } else {
+            console.error("Auto-save failed:", saveData.error);
+            toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+          }
+        } catch (saveError) {
+          console.error("Auto-save error:", saveError);
+          toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+        }
       } else {
         toast.error("Failed to calculate: " + calcData.error);
       }
@@ -1315,6 +1448,28 @@ export default function AgentChatPage() {
       if (calcData.success) {
         setValuationResult(calcData.data);
         toast.success("Valuation calculated successfully!");
+
+        // Auto-save to Airtable
+        try {
+          toast.info("Saving to database...");
+          const saveResponse = await fetch("/api/valuation/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(calcData.data),
+          });
+
+          const saveData = await saveResponse.json();
+          if (saveData.success) {
+            setAutoSaved(true);
+            toast.success("💾 Automatically saved to database!");
+          } else {
+            console.error("Auto-save failed:", saveData.error);
+            toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+          }
+        } catch (saveError) {
+          console.error("Auto-save error:", saveError);
+          toast.warning("Valuation calculated but auto-save failed. You can save manually.");
+        }
       } else {
         toast.error("Failed to calculate: " + calcData.error);
       }
@@ -1562,6 +1717,7 @@ export default function AgentChatPage() {
                 onSave={saveValuation}
                 onExport={exportPDF}
                 saving={saving}
+                autoSaved={autoSaved}
               />
             )}
 
