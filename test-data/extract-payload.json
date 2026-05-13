@@ -1,0 +1,19 @@
+{
+  "messages": [
+    {"role": "user", "content": "Hello, I need help with business valuation"},
+    {"role": "assistant", "content": "I'd be happy to help! What is your business's annual revenue in SGD?"},
+    {"role": "user", "content": "My revenue is 500,000 SGD"},
+    {"role": "assistant", "content": "Great! What is your net profit or EBITDA in SGD?"},
+    {"role": "user", "content": "Net profit is 75,000 SGD"},
+    {"role": "assistant", "content": "Thank you. What industry is your business in?"},
+    {"role": "user", "content": "Restaurant, F&B business"},
+    {"role": "assistant", "content": "How many years has your business been operating?"},
+    {"role": "user", "content": "5 years"},
+    {"role": "assistant", "content": "What is the estimated value of your business assets (equipment, inventory, etc.)?"},
+    {"role": "user", "content": "About 50,000 SGD"},
+    {"role": "assistant", "content": "Is your business revenue growing, stable, or declining?"},
+    {"role": "user", "content": "It's been stable"},
+    {"role": "assistant", "content": "Are there any customer concentration risks or other risk factors I should know about?"},
+    {"role": "user", "content": "Top 3 customers account for about 40% of revenue"}
+  ]
+}

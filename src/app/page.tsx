@@ -15,137 +15,149 @@ export default function HomePage() {
         }}
       >
         <div className="gradient-text text-xs md:text-sm font-bold tracking-widest uppercase mb-4">
-          AI-Powered Business Brokerage
+          AI-Powered Business Valuation
         </div>
 
         <h1 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold leading-tight mb-3">
-          5 Intelligent Agents
+          Business Valuation Agent
           <br />
           <span
             className="text-2xl md:text-4xl italic"
             style={{ color: "rgba(255,255,255,0.5)" }}
           >
-            for Business M&A Workflows
+            Powered by Claude AI
           </span>
         </h1>
 
         <p className="text-white/45 text-sm md:text-base max-w-xl mx-auto mb-2">
-          Each agent is powered by Claude AI. Click any agent to start an
-          interactive conversation.
+          Get professional business valuation estimates for Singapore SME businesses.
+          Click below to start an interactive consultation.
         </p>
       </div>
 
-      {/* Agent Grid */}
-      <div className="max-w-5xl mx-auto px-5 pb-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {AGENTS.map((agent, index) => (
-            <Link
-              key={agent.id}
-              href={`/agents/${agent.id}`}
-              className="card-hover block"
+      {/* Valuation Agent Card */}
+      <div className="max-w-3xl mx-auto px-5 pb-20">
+        {AGENTS.map((agent) => (
+          <Link
+            key={agent.id}
+            href={`/agents/${agent.id}`}
+            className="card-hover block"
+          >
+            <div
+              className="relative overflow-hidden rounded-3xl p-10 md:p-12 transition-all duration-300"
               style={{
-                animation: `fadeSlideIn 0.4s ease ${index * 0.08}s both`,
+                background: "rgba(255,255,255,0.03)",
+                border: `2px solid ${agent.color}33`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = `${agent.color}10`;
+                e.currentTarget.style.borderColor = `${agent.color}66`;
+                e.currentTarget.style.boxShadow = `0 30px 60px ${agent.color}30`;
+                e.currentTarget.style.transform = "translateY(-4px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                e.currentTarget.style.borderColor = `${agent.color}33`;
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.transform = "translateY(0)";
               }}
             >
+              {/* Decorative Glow */}
               <div
-                className="relative overflow-hidden rounded-2xl p-6 transition-all duration-300"
+                className="absolute top-0 right-0 w-64 h-64 rounded-full"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: `1px solid ${agent.color}33`,
+                  background: `radial-gradient(circle, ${agent.color}20, transparent 70%)`,
+                  transform: "translate(30%, -30%)",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `${agent.color}10`;
-                  e.currentTarget.style.borderColor = `${agent.color}66`;
-                  e.currentTarget.style.boxShadow = `0 20px 40px ${agent.color}20`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                  e.currentTarget.style.borderColor = `${agent.color}33`;
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                {/* Decorative Glow */}
+              />
+
+              {/* Header */}
+              <div className="flex flex-col items-center text-center mb-8 relative z-10">
                 <div
-                  className="absolute top-0 right-0 w-32 h-32 rounded-full"
+                  className="w-20 h-20 rounded-2xl flex items-center justify-center text-5xl mb-4"
                   style={{
-                    background: `radial-gradient(circle, ${agent.color}15, transparent 70%)`,
-                    transform: "translate(30%, -30%)",
+                    background: `${agent.color}18`,
+                    border: `3px solid ${agent.color}55`,
                   }}
-                />
-
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-4 relative z-10">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                    style={{
-                      background: `${agent.color}18`,
-                      border: `2px solid ${agent.color}55`,
-                    }}
-                  >
-                    {agent.icon}
-                  </div>
-                  <div
-                    className="text-xs font-bold tracking-wider uppercase"
-                    style={{ color: agent.color }}
-                  >
-                    Agent {index + 1}
-                  </div>
+                >
+                  {agent.icon}
                 </div>
+                <div
+                  className="text-xs font-bold tracking-wider uppercase mb-2"
+                  style={{ color: agent.color }}
+                >
+                  AI-Powered Agent
+                </div>
+                <h3 className="font-display text-3xl md:text-4xl font-bold mb-3">
+                  {agent.name}
+                </h3>
+                <p className="text-base md:text-lg text-white/60 leading-relaxed max-w-lg">
+                  {agent.description}
+                </p>
+              </div>
 
-                {/* Content */}
-                <div className="relative z-10">
-                  <h3 className="font-display text-lg font-bold mb-2">
-                    {agent.name}
-                  </h3>
-                  <p className="text-sm text-white/45 leading-relaxed mb-5">
-                    {agent.description}
-                  </p>
-
-                  {/* CTA */}
-                  <div
-                    className="flex items-center gap-2 text-sm font-semibold"
-                    style={{ color: agent.color }}
-                  >
-                    Launch Agent
-                    <span className="text-base">→</span>
+              {/* Features */}
+              <div className="relative z-10 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
+                    <div className="text-2xl mb-2">💰</div>
+                    <div className="text-xs font-semibold text-white/80">Revenue & Profit Based</div>
+                  </div>
+                  <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
+                    <div className="text-2xl mb-2">📈</div>
+                    <div className="text-xs font-semibold text-white/80">Industry Benchmarks</div>
+                  </div>
+                  <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
+                    <div className="text-2xl mb-2">🎯</div>
+                    <div className="text-xs font-semibold text-white/80">Singapore SME Focus</div>
                   </div>
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
 
-        {/* Architecture Card */}
+              {/* CTA */}
+              <div className="relative z-10 text-center">
+                <div
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-base font-bold transition-all"
+                  style={{
+                    background: `linear-gradient(135deg, ${agent.color}, ${agent.color}cc)`,
+                    color: "#000",
+                  }}
+                >
+                  Start Valuation Consultation
+                  <span className="text-xl">→</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+
+        {/* How It Works */}
         <div
-          className="mt-6 rounded-2xl p-6"
+          className="mt-8 rounded-2xl p-8"
           style={{
             background: "rgba(255,255,255,0.02)",
             border: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          <div className="text-xs font-bold tracking-widest uppercase text-white/30 mb-4">
-            Recommended Architecture
+          <div className="text-sm font-bold tracking-widest uppercase text-white/30 mb-6 text-center">
+            How It Works
           </div>
-          <div className="flex items-center gap-2 flex-wrap text-xs md:text-sm">
+          <div className="flex items-center justify-center gap-3 flex-wrap text-sm">
             {[
-              "Website Form",
+              "📝 Share Business Info",
               "→",
-              "Airtable / HubSpot CRM",
+              "🤖 AI Analysis",
               "→",
-              "AI Agent Workflow",
+              "📊 Get Valuation Report",
               "→",
-              "Email / WhatsApp",
-              "→",
-              "Admin Approval",
-              "→",
-              "Listing Published",
+              "💡 Pricing Insights",
             ].map((step, i) => (
               <span
                 key={i}
                 className={
                   step === "→"
-                    ? "text-white/20 text-lg"
-                    : "bg-white/6 px-3 py-1.5 rounded-lg font-semibold"
+                    ? "text-white/20 text-xl"
+                    : "bg-white/6 px-4 py-2 rounded-lg font-semibold"
                 }
               >
                 {step}

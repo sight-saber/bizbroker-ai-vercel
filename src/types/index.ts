@@ -1,5 +1,5 @@
 // Agent Types
-export type AgentId = "onboarding" | "valuation" | "matching" | "diligence" | "qualification";
+export type AgentId = "valuation";
 
 export interface Agent {
   id: AgentId;
@@ -76,6 +76,57 @@ export interface BuyerLead {
 export interface AirtableLeadRecord extends BuyerLead {
   id: string;
   status: "New" | "Contacted" | "Qualified" | "Nurturing" | "Converted";
+  created: string;
+}
+
+// Valuation Types
+export type IndustryType =
+  | "fnb_retail"
+  | "services"
+  | "tech_saas"
+  | "education"
+  | "manufacturing"
+  | "ecommerce"
+  | "healthcare";
+
+export type GrowthTrend = "growing" | "stable" | "declining";
+
+export interface ValuationInput {
+  annualRevenue: number;
+  netProfit: number;
+  ebitda: number;
+  industry: IndustryType;
+  yearsInOperation: number;
+  assetValue: number;
+  growthTrend: GrowthTrend;
+  customerConcentration?: string;
+  riskFactors?: string[];
+  businessName?: string;
+  contactEmail?: string;
+}
+
+export interface ValuationMethodResult {
+  method: string;
+  value: number;
+  multiplier: number;
+  weight: number;
+}
+
+export interface ValuationResult {
+  input: ValuationInput;
+  methods: ValuationMethodResult[];
+  conservative: number;
+  fairMarket: number;
+  optimistic: number;
+  weightedAverage: number;
+  positiveFactors: string[];
+  riskFactors: string[];
+  recommendations: string;
+  calculatedAt: string;
+}
+
+export interface ValuationRecord extends ValuationResult {
+  id: string;
   created: string;
 }
 

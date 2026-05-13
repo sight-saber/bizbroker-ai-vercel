@@ -1,0 +1,12 @@
+{
+  "annualRevenue": 500000,
+  "netProfit": 75000,
+  "ebitda": 75000,
+  "industry": "fnb_retail",
+  "yearsInOperation": 5,
+  "assetValue": 50000,
+  "growthTrend": "stable",
+  "riskFactors": ["High customer concentration (40% from top 3)"],
+  "businessName": "Test Restaurant",
+  "contactEmail": "test@example.com"
+}

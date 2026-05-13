@@ -12,7 +12,14 @@
       "Bash(echo \"请运行以下命令：\n\nvercel env add ANTHROPIC_API_KEY production\n\n然后输入您的 API Key:\n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\")",
       "Bash(vercel ls:*)",
       "Bash(echo:*)",
-      "Bash(GIT_SEQUENCE_EDITOR='sed -i \"\"\"\" \"\"s/^pick 108f2c4/edit 108f2c4/\"\"' git rebase -i 490e207)"
+      "Bash(GIT_SEQUENCE_EDITOR='sed -i \"\"\"\" \"\"s/^pick 108f2c4/edit 108f2c4/\"\"' git rebase -i 490e207)",
+      "Bash(npm install:*)",
+      "Bash(npm run setup:airtable:*)",
+      "Bash(find:*)",
+      "Bash(python3:*)",
+      "Bash(for industry in \"services\" \"tech_saas\" \"education\" \"manufacturing\" \"healthcare\")",
+      "Bash(do echo \"Testing $industry...\" curl -s -X POST http://localhost:3000/api/valuation/calculate -H \"Content-Type: application/json\" -d \"{\n    \"\"annualRevenue\"\": 500000,\n    \"\"netProfit\"\": 100000,\n    \"\"ebitda\"\": 100000,\n    \"\"industry\"\": \"\"$industry\"\",\n    \"\"yearsInOperation\"\": 5,\n    \"\"assetValue\"\": 50000,\n    \"\"growthTrend\"\": \"\"stable\"\"\n  }\")",
+      "Bash(git add:*)"
     ]
   }
 }

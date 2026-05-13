@@ -4,6 +4,8 @@ import {
   AirtableListingRecord,
   BuyerLead,
   AirtableLeadRecord,
+  ValuationResult,
+  ValuationRecord,
 } from "@/types";
 
 // ✅ 懒加载初始化 - 避免 build 时因缺少环境变量报错
@@ -188,4 +190,92 @@ export async function updateLeadStatus(
   await base("Leads").update(recordId, {
     Status: status,
   });
+}
+
+// Valuations 表操作
+export async function createValuation(
+  valuation: ValuationResult
+): Promise<string> {
+  const base = getBase();
+  const record = await base("Valuations").create({
+    "Business Name": valuation.input.businessName || "Unknown",
+    "Contact Email": valuation.input.contactEmail || "",
+    "Annual Revenue": valuation.input.annualRevenue,
+    "Net Profit": valuation.input.netProfit,
+    EBITDA: valuation.input.ebitda,
+    Industry: valuation.input.industry,
+    "Years in Operation": valuation.input.yearsInOperation,
+    "Asset Value": valuation.input.assetValue,
+    "Growth Trend": valuation.input.growthTrend,
+    "Customer Concentration": valuation.input.customerConcentration || "",
+    "Risk Factors": valuation.riskFactors.join("; "),
+    "Positive Factors": valuation.positiveFactors.join("; "),
+    "Conservative Valuation": valuation.conservative,
+    "Fair Market Valuation": valuation.fairMarket,
+    "Optimistic Valuation": valuation.optimistic,
+    "Weighted Average": valuation.weightedAverage,
+    Recommendations: valuation.recommendations,
+    "Methods Used": JSON.stringify(valuation.methods),
+    "Calculated At": valuation.calculatedAt,
+  });
+
+  return record.id;
+}
+
+export async function getValuations(
+  email?: string
+): Promise<ValuationRecord[]> {
+  const base = getBase();
+  const valuations: ValuationRecord[] = [];
+
+  let filterFormula = "";
+  if (email) {
+    filterFormula = `{Contact Email} = '${email}'`;
+  }
+
+  const records = await base("Valuations")
+    .select({
+      ...(filterFormula && { filterByFormula: filterFormula }),
+      sort: [{ field: "Created", direction: "desc" }],
+    })
+    .all();
+
+  records.forEach((record) => {
+    const methodsData = record.get("Methods Used") as string;
+    let methods = [];
+    try {
+      methods = JSON.parse(methodsData || "[]");
+    } catch (e) {
+      methods = [];
+    }
+
+    valuations.push({
+      id: record.id,
+      input: {
+        businessName: record.get("Business Name") as string,
+        contactEmail: record.get("Contact Email") as string,
+        annualRevenue: record.get("Annual Revenue") as number,
+        netProfit: record.get("Net Profit") as number,
+        ebitda: record.get("EBITDA") as number,
+        industry: record.get("Industry") as any,
+        yearsInOperation: record.get("Years in Operation") as number,
+        assetValue: record.get("Asset Value") as number,
+        growthTrend: record.get("Growth Trend") as any,
+        customerConcentration: record.get("Customer Concentration") as string,
+        riskFactors: (record.get("Risk Factors") as string)?.split("; ") || [],
+      },
+      methods,
+      conservative: record.get("Conservative Valuation") as number,
+      fairMarket: record.get("Fair Market Valuation") as number,
+      optimistic: record.get("Optimistic Valuation") as number,
+      weightedAverage: record.get("Weighted Average") as number,
+      positiveFactors: (record.get("Positive Factors") as string)?.split("; ") || [],
+      riskFactors: (record.get("Risk Factors") as string)?.split("; ") || [],
+      recommendations: record.get("Recommendations") as string,
+      calculatedAt: record.get("Calculated At") as string,
+      created: record.get("Created") as string,
+    });
+  });
+
+  return valuations;
 }

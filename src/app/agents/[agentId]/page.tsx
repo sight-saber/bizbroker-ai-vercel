@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getAgentById } from "@/lib/agents";
-import type { Message, AgentId } from "@/types";
+import type { Message, AgentId, ValuationResult, ValuationRecord } from "@/types";
 
 // Typing Indicator Component
 function TypingIndicator({ color }: { color: string }) {
@@ -35,22 +35,15 @@ function ChatBubble({
 
   // Simple markdown rendering
   const renderContent = (content: string) => {
-    // Convert markdown to basic HTML
     let html = content
-      // Bold
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      // Headers
       .replace(/^### (.*$)/gim, "<h3>$1</h3>")
       .replace(/^## (.*$)/gim, "<h2>$1</h2>")
       .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-      // Horizontal rule
       .replace(/^---$/gim, "<hr />")
-      // Lists (simple)
       .replace(/^\- (.*$)/gim, "<li>$1</li>")
-      // Line breaks
       .replace(/\n/g, "<br />");
 
-    // Wrap lists (using [\s\S] instead of . with s flag for compatibility)
     html = html.replace(/(<li>[\s\S]*?<\/li>)/gi, "<ul>$1</ul>");
 
     return html;
@@ -90,6 +83,169 @@ function ChatBubble({
   );
 }
 
+// Valuation Result Display Component
+function ValuationDisplay({
+  valuation,
+  agentColor,
+  onSave,
+  onExport,
+  saving,
+}: {
+  valuation: ValuationResult;
+  agentColor: string;
+  onSave: () => void;
+  onExport: () => void;
+  saving: boolean;
+}) {
+  return (
+    <div
+      className="rounded-2xl p-6 mb-4 border"
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        borderColor: `${agentColor}44`,
+      }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold">📊 Valuation Result</h3>
+        <div className="flex gap-2">
+          <button
+            onClick={onSave}
+            disabled={saving}
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+            style={{
+              background: saving ? "rgba(255,255,255,0.1)" : `${agentColor}33`,
+              border: `1px solid ${agentColor}`,
+              color: "#fff",
+            }}
+          >
+            {saving ? "Saving..." : "💾 Save"}
+          </button>
+          <button
+            onClick={onExport}
+            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+            style={{
+              background: `${agentColor}33`,
+              border: `1px solid ${agentColor}`,
+              color: "#fff",
+            }}
+          >
+            📄 Export PDF
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <div className="text-xs text-white/50 mb-1">🔻 Conservative</div>
+          <div className="text-xl font-bold" style={{ color: agentColor }}>
+            SGD ${valuation.conservative.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </div>
+        </div>
+        <div className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <div className="text-xs text-white/50 mb-1">⚖️ Fair Market</div>
+          <div className="text-xl font-bold" style={{ color: agentColor }}>
+            SGD ${valuation.fairMarket.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </div>
+        </div>
+        <div className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <div className="text-xs text-white/50 mb-1">🔺 Optimistic</div>
+          <div className="text-xl font-bold" style={{ color: agentColor }}>
+            SGD ${valuation.optimistic.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </div>
+        </div>
+      </div>
+
+      <div className="text-sm text-white/70">
+        <strong>Methodology:</strong> {valuation.methods.map(m => m.method).join(", ")}
+      </div>
+    </div>
+  );
+}
+
+// History Modal Component
+function HistoryModal({
+  history,
+  onClose,
+  agentColor,
+}: {
+  history: ValuationRecord[];
+  onClose: () => void;
+  agentColor: string;
+}) {
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-background rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden border-2"
+        style={{ borderColor: agentColor }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="p-6 border-b flex items-center justify-between"
+          style={{ borderColor: `${agentColor}33` }}
+        >
+          <h2 className="text-xl font-bold">📚 Valuation History</h2>
+          <button
+            onClick={onClose}
+            className="text-2xl hover:opacity-70 transition-opacity"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="overflow-y-auto p-6" style={{ maxHeight: "calc(80vh - 100px)" }}>
+          {history.length === 0 ? (
+            <div className="text-center py-12 text-white/50">
+              No valuation history found
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {history.map((record) => (
+                <div
+                  key={record.id}
+                  className="p-4 rounded-lg border"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    borderColor: "rgba(255,255,255,0.1)",
+                  }}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-bold">{record.input.businessName || "Unnamed Business"}</div>
+                      <div className="text-sm text-white/50">
+                        {new Date(record.created).toLocaleDateString("en-SG")}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-white/50">Fair Market</div>
+                      <div className="text-lg font-bold" style={{ color: agentColor }}>
+                        SGD ${record.fairMarket.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-white/50">Revenue:</span> SGD ${record.input.annualRevenue.toLocaleString()}
+                    </div>
+                    <div>
+                      <span className="text-white/50">Profit:</span> SGD ${record.input.netProfit.toLocaleString()}
+                    </div>
+                    <div>
+                      <span className="text-white/50">Industry:</span> {record.input.industry}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AgentChatPage() {
   const params = useParams();
   const router = useRouter();
@@ -101,6 +257,11 @@ export default function AgentChatPage() {
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
+  const [valuationResult, setValuationResult] = useState<ValuationResult | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<ValuationRecord[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -191,6 +352,105 @@ export default function AgentChatPage() {
     }
   };
 
+  const calculateValuation = async () => {
+    setProcessing(true);
+    try {
+      // Step 1: Extract data from conversation
+      const extractResponse = await fetch("/api/valuation/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      });
+
+      const extractData = await extractResponse.json();
+      if (!extractData.success) {
+        alert("Could not extract valuation data. Please provide all required information.");
+        return;
+      }
+
+      // Step 2: Calculate valuation
+      const calcResponse = await fetch("/api/valuation/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(extractData.data),
+      });
+
+      const calcData = await calcResponse.json();
+      if (calcData.success) {
+        setValuationResult(calcData.data);
+      } else {
+        alert("Failed to calculate valuation: " + calcData.error);
+      }
+    } catch (error) {
+      console.error("Valuation error:", error);
+      alert("An error occurred while calculating valuation");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const saveValuation = async () => {
+    if (!valuationResult) return;
+
+    setSaving(true);
+    try {
+      const response = await fetch("/api/valuation/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(valuationResult),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert("✅ Valuation saved successfully!");
+      } else {
+        alert("Failed to save: " + data.error);
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      alert("An error occurred while saving");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const exportPDF = async () => {
+    if (!valuationResult) return;
+
+    try {
+      const response = await fetch("/api/valuation/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(valuationResult),
+      });
+
+      const html = await response.text();
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+        setTimeout(() => printWindow.print(), 500);
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+      alert("Failed to export PDF");
+    }
+  };
+
+  const loadHistory = async () => {
+    try {
+      const response = await fetch("/api/valuation/history");
+      const data = await response.json();
+      if (data.success) {
+        setHistory(data.data.valuations);
+        setShowHistory(true);
+      }
+    } catch (error) {
+      console.error("History error:", error);
+      alert("Failed to load history");
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
@@ -229,9 +489,32 @@ export default function AgentChatPage() {
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-2 text-xs text-green-400">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          Active
+        <div className="ml-auto flex items-center gap-2">
+          {started && messages.length > 2 && (
+            <>
+              <button
+                onClick={calculateValuation}
+                disabled={processing}
+                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all"
+                style={{
+                  background: processing ? "rgba(255,255,255,0.1)" : `${agent.color}33`,
+                  border: `1px solid ${agent.color}`,
+                }}
+              >
+                {processing ? "Processing..." : "🧮 Calculate"}
+              </button>
+              <button
+                onClick={loadHistory}
+                className="px-4 py-2 text-sm rounded-lg font-semibold transition-all"
+                style={{
+                  background: `${agent.color}22`,
+                  border: `1px solid ${agent.color}44`,
+                }}
+              >
+                📚 History
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -284,6 +567,15 @@ export default function AgentChatPage() {
                 </div>
               </div>
             )}
+            {valuationResult && (
+              <ValuationDisplay
+                valuation={valuationResult}
+                agentColor={agent.color}
+                onSave={saveValuation}
+                onExport={exportPDF}
+                saving={saving}
+              />
+            )}
             <div ref={bottomRef} />
           </>
         )}
@@ -328,6 +620,15 @@ export default function AgentChatPage() {
             Send
           </button>
         </div>
+      )}
+
+      {/* History Modal */}
+      {showHistory && (
+        <HistoryModal
+          history={history}
+          onClose={() => setShowHistory(false)}
+          agentColor={agent.color}
+        />
       )}
     </div>
   );
