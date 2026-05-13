@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/useToast";
 import { ToastContainer } from "@/components/Toast";
 import { ValuationSkeleton } from "@/components/LoadingSkeleton";
 import { ProgressTracker } from "@/components/ProgressTracker";
+import { InputGuide } from "@/components/InputGuide";
 import { apiCache } from "@/lib/cache";
 
 // Typing Indicator Component
@@ -862,7 +863,7 @@ export default function AgentChatPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-5">
         {!started ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
+          <div className="flex flex-col items-center justify-center h-full gap-4 max-w-4xl mx-auto">
             <div
               className="text-6xl mb-2"
               style={{ animation: "scaleIn 0.5s ease-out" }}
@@ -872,9 +873,15 @@ export default function AgentChatPage() {
             <div className="font-display text-2xl font-bold text-center">
               {agent.name} Agent
             </div>
-            <div className="text-sm text-white/50 text-center max-w-xs">
+            <div className="text-sm text-white/50 text-center max-w-xs mb-4">
               {agent.description}
             </div>
+
+            {/* Input Guide */}
+            <div className="w-full">
+              <InputGuide agentColor={agent.color} />
+            </div>
+
             <button
               onClick={startChat}
               className="mt-2 px-8 py-3 rounded-full font-bold text-sm transition-all hover:scale-110 active:scale-95 shadow-lg"
@@ -884,7 +891,7 @@ export default function AgentChatPage() {
                 boxShadow: `0 8px 24px ${agent.color}44`,
               }}
             >
-              Start Conversation
+              Start Valuation Consultation
             </button>
           </div>
         ) : (
